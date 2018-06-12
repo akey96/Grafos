@@ -95,6 +95,7 @@ class AdminAgency():
         self.__graph = deepcopy( self.__map )
 
     def addDemand(self,nodeBegin, nodeEnd, demandPassenger ):
+
         if not nodeBegin in self.__listDemandsForDay:
             self.__listDemandsForDay[nodeBegin] = {}
         self.__listDemandsForDay[nodeBegin][nodeEnd] = demandPassenger
@@ -106,12 +107,11 @@ class AdminAgency():
         return n
 
     def setDemand(self, nodeBegin, nodeEnd, demandPassenger ):
-
         try:
             self.__listDemandsForDay[nodeBegin][nodeEnd] = demandPassenger
         except KeyError as e:
             raise IndexDemandIncorrect()
-
+            pass
 
 
     def lockingRoot( self, nodeBegin, nodeEnd ):

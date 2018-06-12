@@ -10,6 +10,7 @@ class CapacityNotAllowed(Exception):
     def __repr__(self):
         return f'TypeError: Capacity of graph not allowed'
 
+
 class IndexDemandIncorrect(Exception):
 
     def __init__(self):
