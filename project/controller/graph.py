@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 # coding: utf-8
-
 import networkx as nx
 from project.controller.exception import CapacityNotAllowed, IndexDemandIncorrect
 from functools import total_ordering
@@ -9,22 +8,26 @@ from collections import OrderedDict
 
 @total_ordering
 class Bus():
-    
-    def __init__( self, numberBus, capacity, isBusCama, position ):
-        self.__numberBus = numberBus
-        self.__capacity = capacity
+
+    capacity=50
+    cont = 0
+    def __init__( self,  position ):
+        Bus.cont += 1
+        self.__numberBus = Bus.cont
         self.__numberPassenger = 0
-        self.__isBusCama = isBusCama
         self.__position = position
+        self.__hoursWork = 20
+
+    def getHoursWork(self):
+        return self.__hoursWork
 
     def getNumberBus(self):
         return self.__numberBus
 
-    def getCapacity(self):
-        return self.__capacity
+    @staticmethod
+    def getCapacity():
+        return Bus.capacity
 
-    def getIsBusCama(self):
-        return self.__isBusCama
 
     def getPosition(self):
         return self.__position
@@ -33,7 +36,7 @@ class Bus():
         return self.__numberPassenger
 
     def addPassenger(self, n ):
-        if self.__numberPassenger + n > self.__capacity:
+        if self.__numberPassenger + n > Bus.capacity:
             raise CapacityNotAllowed()
         self.__numberPassenger += n
 
@@ -54,10 +57,10 @@ class Bus():
 
     def __repr__(self):
         cad = f'{"Bus {}".format(self.__numberBus) :*^30}\n'
-        cad += f'{"capacity": <10} : {self.__capacity} \n'
-        cad += f'{"isBusCama": <10} : {self.__isBusCama} \n'
+        cad += f'{"capacity": <10} : {Bus.capacity} \n'
         cad += f'{"position": <10} : {self.__position} \n\n'
 
+        # agregar para las demas variables
         return cad
 
 
@@ -121,6 +124,22 @@ class AdminAgency():
             raise IndexDemandIncorrect()
         self.__orderingDictDemand()
 
+    def routeDirect(self):
+        caminos = []
+        for begin in self.__dicDemandsForDay.keys():
+            for end in self.__dicDemandsForDay[begin].keys():
+                while self.__dicDemandsForDay[begin][end] >  Bus.getCapacity():
+                    caminos.append(nx.dijkstra_path(self.__graph, begin, end))
+                    self.__dicDemandsForDay[begin][end] -= Bus.getCapacity()
+
+        return caminos
+
+    def routePartital(self):
+        caminos = []
+        for begin in self.__dicDemandsForDay.keys():
+            for end in self.__dicDemandsForDay[begin].keys():
+                pass
+
 
     def lockingRoute( self, nodeBegin, nodeEnd ):
         self.__graph.remove_edge(nodeBegin, nodeEnd)
@@ -142,7 +161,4 @@ class AdminAgency():
             cad += f'{begin: <4}--{end: >4}, with timeTravel of {timeT} hours \n'
 
         return cad
-        
-
-
 
