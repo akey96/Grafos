@@ -5,8 +5,7 @@ import networkx as nx
 from project.controller.exception import CapacityNotAllowed, IndexDemandIncorrect
 from functools import total_ordering
 from copy import deepcopy
-
-
+from collections import OrderedDict
 
 @total_ordering
 class Bus():
@@ -67,7 +66,7 @@ class AdminAgency():
     
     def __init__(self):
         self.__listBuses = []
-        self.__listDemandsForDay = {}
+        self.__dicDemandsForDay = {}
         self.__map = nx.Graph()
         self.__graph = None
 
@@ -87,37 +86,46 @@ class AdminAgency():
     def getListBuses(self):
         return self.__listBuses
 
-    def getLisDemandForDay(self):
-        return self.__listDemandsForDay
+    def getDictDemandForDay(self):
+        return self.__dicDemandsForDay
 
-    def addRoot(self, nodeBegin, nodeEnd, timeTravel ):
+    def addRoute(self, nodeBegin, nodeEnd, timeTravel ):
         self.__map.add_edge( nodeBegin, nodeEnd, weight=timeTravel )
         self.__graph = deepcopy( self.__map )
 
+
+    def __orderingDictDemand(self):
+        for k in self.__dicDemandsForDay.keys():
+            self.__dicDemandsForDay[k] = OrderedDict(sorted(self.__dicDemandsForDay[k].items(), key=lambda t: t[1], reverse=True))
+
+
     def addDemand(self,nodeBegin, nodeEnd, demandPassenger ):
 
-        if not nodeBegin in self.__listDemandsForDay:
-            self.__listDemandsForDay[nodeBegin] = {}
-        self.__listDemandsForDay[nodeBegin][nodeEnd] = demandPassenger
+        if not nodeBegin in self.__dicDemandsForDay:
+            self.__dicDemandsForDay[nodeBegin] = {}
+        self.__dicDemandsForDay[nodeBegin][nodeEnd] = demandPassenger
+        self.__orderingDictDemand()
+
+
 
     def lenDemand(self):
         n = 0
-        for k in self.__listDemandsForDay.keys():
-            n += len(self.__listDemandsForDay[k])
+        for k in self.__dicDemandsForDay.keys():
+            n += len(self.__dicDemandsForDay[k])
         return n
 
     def setDemand(self, nodeBegin, nodeEnd, demandPassenger ):
         try:
-            self.__listDemandsForDay[nodeBegin][nodeEnd] = demandPassenger
+            self.__dicDemandsForDay[nodeBegin][nodeEnd] = demandPassenger
         except KeyError as e:
             raise IndexDemandIncorrect()
-            pass
+        self.__orderingDictDemand()
 
 
-    def lockingRoot( self, nodeBegin, nodeEnd ):
+    def lockingRoute( self, nodeBegin, nodeEnd ):
         self.__graph.remove_edge(nodeBegin, nodeEnd)
 
-    def unlockingRoot(self, nodeBegin, nodeEnd ):
+    def unlockingRoute(self, nodeBegin, nodeEnd ):
         timeTravel = self.__map[nodeBegin][nodeEnd]['weight']
         self.__graph.add_edge( nodeBegin, nodeEnd, weight=timeTravel )
 
@@ -126,11 +134,11 @@ class AdminAgency():
         for bus in self.__listBuses:
             cad += bus.__repr__()
 
-        cad += f'{"map complete of  travel" :_^40}\n\n'
-        for root in list(self.__map.edges.data()):
-            begin = root[0]
-            end = root[1]
-            timeT = root[2]['weight']
+        cad += f'{"routes map for the graph" :_^40}\n\n'
+        for route in list(self.__map.edges.data()):
+            begin = route[0]
+            end = route[1]
+            timeT = route[2]['weight']
             cad += f'{begin: <4}--{end: >4}, with timeTravel of {timeT} hours \n'
 
         return cad

@@ -7,14 +7,15 @@ from project.controller.graph import AdminAgency, Bus
 if __name__ == "__main__":
     admin = AdminAgency()
 
-    admin.addRoot('LPZ', 'ORU', 3)
-    admin.addRoot('ORU', 'PT',  5)
-    admin.addRoot('ORU', 'CBA', 4)
-    admin.addRoot('PT',  'CHQ', 3)
-    admin.addRoot('PT',  'TJA', 4)
-    admin.addRoot('TJA', 'CHQ', 3)
-    admin.addRoot('TJA', 'SCZ', 8)
-    admin.addRoot('SCZ', 'CBA', 5)
+    # Route defined for graph
+    admin.addRoute('LPZ', 'ORU', 3)
+    admin.addRoute('ORU', 'PT',  5)
+    admin.addRoute('ORU', 'CBA', 4)
+    admin.addRoute('PT',  'CHQ', 3)
+    admin.addRoute('PT',  'TJA', 4)
+    admin.addRoute('TJA', 'CHQ', 3)
+    admin.addRoute('TJA', 'SCZ', 8)
+    admin.addRoute('SCZ', 'CBA', 5)
 
     admin.addBus( Bus(1, 50, False, 'CBA') )
     admin.addBus( Bus(2, 50, False, 'CBA') )
