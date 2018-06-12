@@ -124,6 +124,9 @@ class AdminAgency():
             raise IndexDemandIncorrect()
         self.__orderingDictDemand()
 
+
+
+
     def routeDirect(self):
         caminos = []
         for begin in self.__dicDemandsForDay.keys():
