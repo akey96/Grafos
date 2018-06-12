@@ -128,10 +128,10 @@ class AdminAgency():
         caminos = []
         for begin in self.__dicDemandsForDay.keys():
             for end in self.__dicDemandsForDay[begin].keys():
-                while self.__dicDemandsForDay[begin][end] >  Bus.getCapacity():
+                while self.__dicDemandsForDay[begin][end] >=  Bus.getCapacity():
                     caminos.append(nx.dijkstra_path(self.__graph, begin, end))
                     self.__dicDemandsForDay[begin][end] -= Bus.getCapacity()
-
+        self.__orderingDictDemand()
         return caminos
 
     def routePartital(self):

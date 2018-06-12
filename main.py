@@ -80,10 +80,9 @@ if __name__ == "__main__":
     for x in admin.routeDirect():
         print(x)
 
-    print("===========")
-
-    for x in admin.routeDirect():
-        print(x)
+    dic = admin.getDictDemandForDay()
+    for k, v in dic.items():
+        print( k, dic[k])
 
     #print(admin.getDictDemandForDay()['CBA']['SCZ'])
 
