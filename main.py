@@ -19,12 +19,15 @@ if __name__ == "__main__":
 
     admin.addBus( Bus('CBA') )
     admin.addBus( Bus('CBA') )
-    admin.addBus( Bus('CBA') )
-    admin.addBus( Bus('CBA') )
-    admin.addBus( Bus('CBA') )
-    admin.addBus( Bus('CBA') )
-    admin.addBus( Bus('CBA') )
-    admin.addBus( Bus('CBA') )
+    admin.addBus( Bus('TJA') )
+    admin.addBus( Bus('LPZ') )
+    admin.addBus( Bus('LPZ') )
+    admin.addBus( Bus('ORU') )
+    admin.addBus( Bus('PT') )
+    admin.addBus( Bus('CHQ') )
+    admin.addBus( Bus('SCZ') )
+    admin.addBus( Bus('SCZ') )
+
 
 
 
@@ -77,12 +80,31 @@ if __name__ == "__main__":
     admin.addDemand('TJA', 'CHQ', 60)
     admin.addDemand('TJA', 'SCZ', 60)
 
+    print(f'{"demanda inicial":=^40}\n')
+    dic = admin.getDictDemandForDay()
+    for k in dic.keys():
+        print(k, dic[k])
+
+    print(f'{"rutas trasadas":=^40}\n')
     for x in admin.routeDirect():
         print(x)
 
+    print(f'{"rutas demandas modificas":=^40}\n')
+
     dic = admin.getDictDemandForDay()
-    for k, v in dic.items():
-        print( k, dic[k])
+    for k in dic.keys():
+        print(dic[k])
+
+    print(f'{"rutas demandas modificas":=^40}\n')
+    for bus in admin.getListBuses():
+        print(bus)
+
+
+
+    #admin.routePartital()
 
     #print(admin.getDictDemandForDay()['CBA']['SCZ'])
+
+
+
 
