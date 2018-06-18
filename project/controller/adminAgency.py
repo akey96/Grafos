@@ -1,11 +1,11 @@
 #!/usr/bin/python3
 # coding: utf-8
-
+from collections import OrderedDict
 from copy import deepcopy
 import networkx as nx
 from project.controller.bus import Bus
 from project.controller.routeBus import RouteBus
-
+import matplotlib.pyplot as plt
 
 class AdminAgency():
     
@@ -113,6 +113,7 @@ class AdminAgency():
             while not invalid :
                 pathsOfDemands = nx.single_source_dijkstra_path(self.__graphDemand, self.__listBuses[indexBus].getPosition(), weight=Bus.getCapacity())
                 pathsOfDemands = list(pathsOfDemands.values())
+
                 for routeDemand in sorted(pathsOfDemands[1:], key=lambda x : len(x)):
                     costeRouteDemand = self.__costeRoute2(routeDemand)
                     if costeRouteDemand >= Bus.getCapacity():
@@ -131,8 +132,54 @@ class AdminAgency():
                     else:
                         invalid = True
 
+    def __getVecinosOfNode(self, node):
+        vecinos = list(self.__graphDemand.neighbors(node))
+        valores = {}
+        for i in vecinos:
+            k = self.__graphDemand[node][i][0]['weight']
+            if k > 0:
+                valores[i] = k
+        valores = OrderedDict(sorted(valores.items(), key=lambda t: t[1], reverse=True))
+        return  valores
+
+
+
     def routePartital2(self):
-        pass
+        for indexBus in range(len(self.__listBuses)):
+            listadePosiblesRutas = []
+            horasTotales = 0
+
+            datos = self.__getARouteBus(indexBus)
+            horasTotales += datos[2]
+            while self.__listBuses[indexBus].getHoursWork() >= horasTotales:
+                self.__asingBus(datos[2], datos[0], datos[3][-1], datos[3])
+                #print(datos[4],datos[3][-1])
+                self.__graphDemand[datos[4]][datos[3][-1]][0]['weight'] -= datos[1]
+                datos = self.__getARouteBus(indexBus)
+                horasTotales += datos[2]
+
+
+            #pathsOfDemands = [ element for element in pathsOfDemands if self.__costeRoute2(element) >0 ]
+            #pathsOfDemands = sorted(pathsOfDemands, key=lambda x: self.__costeRoute2(x), reverse=True)
+
+            print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+
+    def __getARouteBus(self, indexBus):
+        DemandsAdjOfBus = self.__getVecinosOfNode(self.__listBuses[indexBus].getPosition())
+        routeGraphFinal = []
+        costeGraphFinal = 0
+        costeDemandFinal = 0
+        for sigDemandAdj, sigCosteAdj in DemandsAdjOfBus.items():
+            route = nx.dijkstra_path(self.__graph, self.__listBuses[indexBus].getPosition(), sigDemandAdj)
+            costeRouteGraph = self.__costeRoute(route)
+            if self.__listBuses[indexBus].getNumberPassenger() >= DemandsAdjOfBus[sigDemandAdj] and self.__listBuses[
+                indexBus].getHoursWork() >= costeRouteGraph:
+                if costeRouteGraph > costeGraphFinal:
+                    routeGraphFinal = route
+                    costeGraphFinal = costeRouteGraph
+                    costeDemandFinal = sigCosteAdj
+        return (indexBus,costeDemandFinal, costeGraphFinal, routeGraphFinal, self.__listBuses[indexBus].getPosition()  )
+
 
     def addDemand2(self,nodeBegin, nodeEnd, demandPassenger ):
         self.__graphDemand.add_edge(nodeBegin, nodeEnd, weight=demandPassenger)

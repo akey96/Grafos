@@ -14,10 +14,13 @@ class Bus():
     def __init__( self,  position ):
         Bus.cont += 1
         self.__numberBus = Bus.cont
-        self.__numberPassenger = 0
+        self.__free_seats = Bus.capacity
         self.__position = position
         self.__hoursWork = 20
         self.__listOfRoutesBus = []
+
+    def getNumberBus(self):
+        return self.__numberBus
 
     def addRouteToListRoutesBuses(self, routeBus):
         self.__listOfRoutesBus.append(routeBus)
@@ -30,7 +33,7 @@ class Bus():
     def subHoursWork(self, n ):
         self.__hoursWork -= n
 
-    def getNumberBus(self):
+    def getFree_seatss(self):
         return self.__numberBus
 
     @staticmethod
@@ -45,17 +48,17 @@ class Bus():
         self.__position = position
 
     def getNumberPassenger(self):
-        return self.__numberPassenger
+        return self.__free_seats
 
     def addPassenger(self, n ):
-        if self.__numberPassenger + n > Bus.capacity:
+        if self.__free_seats + n > Bus.capacity:
             raise CapacityNotAllowed()
-        self.__numberPassenger += n
+        self.__free_seats += n
 
     def subsPassenger( self, n ):
-        if self.__numberPassenger -n < 0:
+        if self.__free_seats -n < 0:
             raise CapacityNotAllowed()
-        self.__numberPassenger -= n
+        self.__free_seats -= n
 
 
     def __eq__(self, other):
@@ -71,7 +74,7 @@ class Bus():
         cad = f'{"Bus {}".format(self.__numberBus) :*^30}\n'
         cad += f'{"capacity": <10} : {Bus.capacity} \n'
         cad += f'{"position": <10} : {self.__position} \n'
-        cad += f'{"numberPassenger": <10} : {self.__numberPassenger} \n'
+        cad += f'{"numberPassenger": <10} : {self.__free_seats} \n'
         cad += f'{"hoursWork": <10} : {self.__hoursWork} \n'
         cad += f'{"listOfRoutesBus": <10} : \n'
         for routeBus in self.__listOfRoutesBus:
