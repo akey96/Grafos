@@ -6,10 +6,32 @@ from functools import total_ordering
 from copy import deepcopy
 from collections import OrderedDict
 
+
+class RouteBus():
+    def __init__(self, route, timeOfDeparture, timeOfArrival):
+        self.__route = route
+        self.__timeOfDeparture = timeOfDeparture
+        self.__timeOfArrival = timeOfArrival
+    def getRoute(self):
+        return self.__route
+    def getTimeOfDeparture(self):
+        return self.__timeOfDeparture
+    def getTimeOfArrival(self):
+        return self.__timeOfArrival
+
+    def __repr__(self):
+        cad = f'{"": ^4}{"Route Bus":-^30}\n'
+        cad += f'{"": ^4}{"route": <10} : {self.__route} \n'
+        cad += f'{"": ^4}{"timeOfDeparture": <10} : {self.__timeOfDeparture} \n'
+        cad += f'{"": ^4}{"timeOfArrival": <10} : {self.__timeOfArrival} \n\n'
+        return cad
+
 @total_ordering
 class Bus():
-    capacity=50
-    cont = 0
+    capacity = 50
+    hourStart = 6
+    hoursWork = 20
+    cont = -1
 
     def __init__( self,  position ):
         Bus.cont += 1
@@ -17,10 +39,12 @@ class Bus():
         self.__numberPassenger = 0
         self.__position = position
         self.__hoursWork = 20
-        self.__route = []
+        self.__listOfRoutesBus = []
 
-    def getRoute(self):
-        return self.__route
+    def addRouteToListRoutesBuses(self, routeBus):
+        self.__listOfRoutesBus.append(routeBus)
+    def getListRoutesBuses(self):
+        return self.__listOfRoutesBus
 
     def getHoursWork(self):
         return self.__hoursWork
@@ -69,9 +93,13 @@ class Bus():
         cad = f'{"Bus {}".format(self.__numberBus) :*^30}\n'
         cad += f'{"capacity": <10} : {Bus.capacity} \n'
         cad += f'{"position": <10} : {self.__position} \n'
-        cad += f'{"hoursWork": <10} : {self.__hoursWork} \n\n'
+        cad += f'{"numberPassenger": <10} : {self.__numberPassenger} \n'
+        cad += f'{"hoursWork": <10} : {self.__hoursWork} \n'
+        cad += f'{"listOfRoutesBus": <10} : \n'
+        for routeBus in self.__listOfRoutesBus:
+            cad += f'{routeBus.__repr__()} \n'
+        cad+="\n"
         return cad
-
 
 
 class AdminAgency():
@@ -149,28 +177,34 @@ class AdminAgency():
                 break
         return index
 
-    def __asingBus(self, costeRoute, indexBus, updateLocation):
-        begin = self.__listBuses[indexBus].getPosition()
+    def __asingBus(self, costeRoute, indexBus, updateLocation, route):
+        #if route == [ 'LPZ','ORU']:
+        #    print("entro ",self.__listBuses[indexBus] )
+        timeOfDeparture =(Bus.hourStart + Bus.hoursWork) - self.__listBuses[indexBus].getHoursWork()
+        timeOfArrival = timeOfDeparture + costeRoute
+        routeBus = RouteBus(route,timeOfDeparture, timeOfArrival)
+        self.__listBuses[indexBus].addRouteToListRoutesBuses(routeBus)
         self.__listBuses[indexBus].subHoursWork(costeRoute)
         self.__listBuses[indexBus].setPosition(updateLocation)
 
-        if self.__listBuses[indexBus].getHoursWork() == -33:
-            print("bus fallando", indexBus, "tramo", begin,updateLocation)
 
     def routeDirect(self):
-        caminos = []
+        #caminos = []
         for begin in self.__dicDemandsForDay.keys():
             for end in self.__dicDemandsForDay[begin].keys():
                 while self.__dicDemandsForDay[begin][end] >=  Bus.getCapacity():
                     route = nx.dijkstra_path(self.__graph, begin, end)
-                    caminos.append(route)
+                    #caminos.append(route)
                     costeRoute = self.__costeRoute(route)
                     indexBus = self.__busFree(costeRoute, begin)
-                    print(caminos, indexBus, )
-                    self.__asingBus(costeRoute,indexBus,end)
-                    self.__dicDemandsForDay[begin][end] -= Bus.getCapacity()
+
+                    if indexBus != -1:
+                        self.__asingBus( costeRoute,indexBus,end, route)
+                        self.__dicDemandsForDay[begin][end] -= Bus.getCapacity()
+                    else:
+                        break
         self.__orderingDictDemand()
-        return caminos
+        #return caminos
 
     def routePartital(self):
 
@@ -191,7 +225,8 @@ class AdminAgency():
             #print( begin,  self.__dicDemandsForDay[begin] )
             #for end in self.__dicDemandsForDay[begin].keys():
 
-
+    def assignRoutesToAllBuses(self):
+        self.routeDirect()
 
     def lockingRoute( self, nodeBegin, nodeEnd ):
         self.__graph.remove_edge(nodeBegin, nodeEnd)

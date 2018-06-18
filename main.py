@@ -17,18 +17,16 @@ if __name__ == "__main__":
     admin.addRoute('TJA', 'SCZ', 8)
     admin.addRoute('SCZ', 'CBA', 10)
 
+    admin.addBus( Bus('LPZ') )
+    admin.addBus( Bus('LPZ') )
+    admin.addBus( Bus('LPZ') )
+    admin.addBus( Bus('PT' ) )
     admin.addBus( Bus('CBA') )
     admin.addBus( Bus('CBA') )
     admin.addBus( Bus('TJA') )
-    admin.addBus( Bus('LPZ') )
-    admin.addBus( Bus('LPZ') )
-    admin.addBus( Bus('ORU') )
-    admin.addBus( Bus('PT') )
+    admin.addBus( Bus('TJA') )
     admin.addBus( Bus('CHQ') )
     admin.addBus( Bus('SCZ') )
-    admin.addBus( Bus('SCZ') )
-
-
 
 
     admin.addDemand('LPZ', 'ORU', 90)
@@ -45,7 +43,7 @@ if __name__ == "__main__":
     admin.addDemand('ORU', 'TJA', 40)
     admin.addDemand('ORU', 'SCZ', 70)
 
-    admin.addDemand('CBA', 'SCZ', 120)
+    admin.addDemand('CBA', 'SCZ', 60)
     admin.addDemand('CBA', 'TJA', 45)
     admin.addDemand('CBA', 'CHQ', 50)
     admin.addDemand('CBA', 'PT',  30)
@@ -77,7 +75,7 @@ if __name__ == "__main__":
     admin.addDemand('TJA', 'ORU', 20)
     admin.addDemand('TJA', 'PT',  30)
     admin.addDemand('TJA', 'CBA', 90)
-    admin.addDemand('TJA', 'CHQ', 60)
+    admin.addDemand('TJA', 'CHQ', 40)
     admin.addDemand('TJA', 'SCZ', 60)
 
     print(f'{"demanda inicial":=^40}\n')
@@ -85,21 +83,16 @@ if __name__ == "__main__":
     for k in dic.keys():
         print(k, dic[k])
 
-    print(f'{"rutas trasadas":=^40}\n')
-    for x in admin.routeDirect():
-        print(x)
+    admin.assignRoutesToAllBuses()
 
     print(f'{"rutas demandas modificas":=^40}\n')
-
     dic = admin.getDictDemandForDay()
     for k in dic.keys():
-        print(dic[k])
+        print(k,dic[k])
 
     print(f'{"rutas demandas modificas":=^40}\n')
     for bus in admin.getListBuses():
         print(bus)
-
-
 
     #admin.routePartital()
 
