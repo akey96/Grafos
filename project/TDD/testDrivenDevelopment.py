@@ -5,7 +5,8 @@
 import unittest
 
 
-from project.controller.graph import AdminAgency, Bus
+from project.controller.adminAgency import AdminAgency
+from project.controller.bus import Bus
 from project.controller.exception import CapacityNotAllowed, IndexDemandIncorrect
 import networkx as nx
 

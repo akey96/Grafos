@@ -1,79 +1,71 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-from project.controller.graph import AdminAgency, Bus
+from project.controller.adminAgency import AdminAgency
+from project.controller.bus import Bus
 
 
-if __name__ == "__main__":
+def test_01_grafos():
     admin = AdminAgency()
-
     # Route defined for graph
     admin.addRoute('LPZ', 'ORU', 3)
-    admin.addRoute('ORU', 'PT',  5)
+    admin.addRoute('ORU', 'PT', 5)
     admin.addRoute('ORU', 'CBA', 4)
-    admin.addRoute('PT',  'CHQ', 3)
-    admin.addRoute('PT',  'TJA', 7)
+    admin.addRoute('PT', 'CHQ', 3)
+    admin.addRoute('PT', 'TJA', 7)
     admin.addRoute('TJA', 'CHQ', 3)
     admin.addRoute('TJA', 'SCZ', 8)
     admin.addRoute('SCZ', 'CBA', 10)
-
-    admin.addBus( Bus('LPZ') )
-    admin.addBus( Bus('LPZ') )
-    admin.addBus( Bus('LPZ') )
-    admin.addBus( Bus('PT' ) )
-    admin.addBus( Bus('CBA') )
-    admin.addBus( Bus('CBA') )
-    admin.addBus( Bus('TJA') )
-    admin.addBus( Bus('TJA') )
-    admin.addBus( Bus('CHQ') )
-    admin.addBus( Bus('SCZ') )
-
+    admin.addBus(Bus('LPZ'))
+    admin.addBus(Bus('LPZ'))
+    admin.addBus(Bus('LPZ'))
+    admin.addBus(Bus('PT'))
+    admin.addBus(Bus('CBA'))
+    admin.addBus(Bus('CBA'))
+    admin.addBus(Bus('TJA'))
+    admin.addBus(Bus('TJA'))
+    admin.addBus(Bus('CHQ'))
+    admin.addBus(Bus('SCZ'))
 
     admin.addDemand('LPZ', 'ORU', 90)
-    admin.addDemand('LPZ', 'PT',  45)
+    admin.addDemand('LPZ', 'PT', 45)
     admin.addDemand('LPZ', 'CBA', 50)
     admin.addDemand('LPZ', 'CHQ', 30)
     admin.addDemand('LPZ', 'SCZ', 40)
     admin.addDemand('LPZ', 'TJA', 30)
-
-    admin.addDemand('ORU', 'LPZ', 75)
-    admin.addDemand('ORU', 'PT',  28)
+    admin.addDemand('ORU', 'LPZ', 45)
+    admin.addDemand('ORU', 'PT', 28)
     admin.addDemand('ORU', 'CBA', 45)
     admin.addDemand('ORU', 'CHQ', 20)
     admin.addDemand('ORU', 'TJA', 40)
-    admin.addDemand('ORU', 'SCZ', 70)
-
+    admin.addDemand('ORU', 'SCZ', 20)
     admin.addDemand('CBA', 'SCZ', 60)
     admin.addDemand('CBA', 'TJA', 45)
     admin.addDemand('CBA', 'CHQ', 50)
-    admin.addDemand('CBA', 'PT',  30)
+    admin.addDemand('CBA', 'PT', 30)
     admin.addDemand('CBA', 'ORU', 60)
-    admin.addDemand('CBA', 'LPZ', 120)
-
+    admin.addDemand('CBA', 'LPZ', 70)
     admin.addDemand('SCZ', 'LPZ', 30)
     admin.addDemand('SCZ', 'CBA', 45)
     admin.addDemand('SCZ', 'ORU', 20)
     admin.addDemand('SCZ', 'PT', 20)
     admin.addDemand('SCZ', 'CHQ', 40)
     admin.addDemand('SCZ', 'TJA', 15)
-
     admin.addDemand('PT', 'TJA', 20)
     admin.addDemand('PT', 'CHQ', 15)
     admin.addDemand('PT', 'ORU', 35)
     admin.addDemand('PT', 'LPZ', 50)
     admin.addDemand('PT', 'CBA', 60)
     admin.addDemand('PT', 'SCZ', 20)
-
     admin.addDemand('CHQ', 'SCZ', 40)
     admin.addDemand('CHQ', 'CBA', 20)
     admin.addDemand('CHQ', 'TJA', 100)
-    admin.addDemand('CHQ', 'PT',  40)
+    admin.addDemand('CHQ', 'PT', 40)
     admin.addDemand('CHQ', 'ORU', 10)
     admin.addDemand('CHQ', 'LPZ', 60)
-
     admin.addDemand('TJA', 'LPZ', 40)
     admin.addDemand('TJA', 'ORU', 20)
-    admin.addDemand('TJA', 'PT',  30)
+    admin.addDemand('TJA', 'PT', 30)
     admin.addDemand('TJA', 'CBA', 90)
     admin.addDemand('TJA', 'CHQ', 40)
     admin.addDemand('TJA', 'SCZ', 60)
@@ -82,22 +74,105 @@ if __name__ == "__main__":
     dic = admin.getDictDemandForDay()
     for k in dic.keys():
         print(k, dic[k])
-
     admin.assignRoutesToAllBuses()
-
     print(f'{"rutas demandas modificas":=^40}\n')
     dic = admin.getDictDemandForDay()
     for k in dic.keys():
-        print(k,dic[k])
-
+        print(k, dic[k])
     print(f'{"rutas demandas modificas":=^40}\n')
     for bus in admin.getListBuses():
         print(bus)
-
-    #admin.routePartital()
-
-    #print(admin.getDictDemandForDay()['CBA']['SCZ'])
-
+    print(admin.getGraphDemand().edges.data())
+    # admin.routePartital()
+    # print(admin.getDictDemandForDay()['CBA']['SCZ'])
 
 
+if __name__ == "__main__":
+    admin = AdminAgency()
 
+    admin.addRoute('LPZ', 'ORU', 3)
+    admin.addRoute('ORU', 'PT', 5)
+    admin.addRoute('ORU', 'CBA', 4)
+    admin.addRoute('PT', 'CHQ', 3)
+    admin.addRoute('PT', 'TJA', 7)
+    admin.addRoute('TJA', 'CHQ', 3)
+    admin.addRoute('TJA', 'SCZ', 8)
+    admin.addRoute('SCZ', 'CBA', 10)
+
+    admin.addBus(Bus('LPZ'))
+    admin.addBus(Bus('ORU'))
+    admin.addBus(Bus('CHQ'))
+    admin.addBus(Bus('PT'))
+    admin.addBus(Bus('CBA'))
+    admin.addBus(Bus('CBA'))
+    admin.addBus(Bus('TJA'))
+    admin.addBus(Bus('TJA'))
+    admin.addBus(Bus('CHQ'))
+    admin.addBus(Bus('SCZ'))
+    # ============================
+    admin.addDemand2('LPZ', 'ORU', 90)
+    admin.addDemand2('LPZ', 'PT', 45)
+    admin.addDemand2('LPZ', 'CBA', 50)
+    admin.addDemand2('LPZ', 'CHQ', 30)
+    admin.addDemand2('LPZ', 'SCZ', 40)
+    admin.addDemand2('LPZ', 'TJA', 30)
+
+    admin.addDemand2('ORU', 'LPZ', 75)
+    admin.addDemand2('ORU', 'PT', 28)
+    admin.addDemand2('ORU', 'CBA', 45)
+    admin.addDemand2('ORU', 'CHQ', 20)
+    admin.addDemand2('ORU', 'TJA', 40)
+    admin.addDemand2('ORU', 'SCZ', 70)
+
+    admin.addDemand2('CBA', 'SCZ', 60)
+    admin.addDemand2('CBA', 'TJA', 45)
+    admin.addDemand2('CBA', 'CHQ', 50)
+    admin.addDemand2('CBA', 'PT', 30)
+    admin.addDemand2('CBA', 'ORU', 60)
+    admin.addDemand2('CBA', 'LPZ', 120)
+
+    admin.addDemand2('SCZ', 'LPZ', 30)
+    admin.addDemand2('SCZ', 'CBA', 75)
+    admin.addDemand2('SCZ', 'ORU', 20)
+    admin.addDemand2('SCZ', 'PT', 20)
+    admin.addDemand2('SCZ', 'CHQ', 40)
+    admin.addDemand2('SCZ', 'TJA', 65)
+
+    admin.addDemand2('PT', 'TJA', 20)
+    admin.addDemand2('PT', 'CHQ', 15)
+    admin.addDemand2('PT', 'ORU', 35)
+    admin.addDemand2('PT', 'LPZ', 50)
+    admin.addDemand2('PT', 'CBA', 60)
+    admin.addDemand2('PT', 'SCZ', 20)
+
+    admin.addDemand2('CHQ', 'SCZ', 40)
+    admin.addDemand2('CHQ', 'CBA', 20)
+    admin.addDemand2('CHQ', 'TJA', 100)
+    admin.addDemand2('CHQ', 'PT', 40)
+    admin.addDemand2('CHQ', 'ORU', 10)
+    admin.addDemand2('CHQ', 'LPZ', 60)
+
+    admin.addDemand2('TJA', 'LPZ', 40)
+    admin.addDemand2('TJA', 'ORU', 20)
+    admin.addDemand2('TJA', 'PT', 30)
+    admin.addDemand2('TJA', 'CBA', 90)
+    admin.addDemand2('TJA', 'CHQ', 40)
+    admin.addDemand2('TJA', 'SCZ', 60)
+
+    print(f'{"demanda inicial":=^40}\n')
+    dic = admin.getGraphDemand()
+    for demand in dic.edges.data():
+        print(demand)
+
+    #print(f'{"":-^40}')
+    admin.assignRoutesToAllBuses2()
+    print(f'{"":-^40}')
+
+    print(f'{"rutas demandas modificas":=^40}\n')
+    dic = admin.getGraphDemand()
+    for demand in dic.edges.data():
+        print(demand)
+
+    print(f'{"buses":=^40}\n')
+    for bus in admin.getListBuses():
+        print(bus)
