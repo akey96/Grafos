@@ -100,15 +100,12 @@ class AdminAgency():
         routeGraphFinal = []
         costeGraphFinal = 0
         costeDemandFinal = 0
-        copyBus = deepcopy(self.__listBuses[indexBus])
-        #print(copyBus.getNumberBus())
         for sigDemandAdj, sigCosteAdj in DemandsAdjOfBus.items():
             route = nx.dijkstra_path(self.__copyOfMapGraph,  self.__listBuses[indexBus].getPosition(), sigDemandAdj)
             costeRouteGraph = self.__costeRouteOfGraphMap(route)
-
-            if self.__listBuses[indexBus].getFree_seats() >= DemandsAdjOfBus[sigDemandAdj] and self.__listBuses[indexBus].getHoursWork() >= costeRouteGraph:
+            if self.__listBuses[indexBus].getFree_seats() >= DemandsAdjOfBus[sigDemandAdj] and self.__listBuses[
+                indexBus].getHoursWork() >= costeRouteGraph:
                 if costeRouteGraph > costeGraphFinal:
-                    #print(copyBus.getFree_seats())
                     routeGraphFinal = route
                     costeGraphFinal = costeRouteGraph
                     costeDemandFinal = sigCosteAdj
@@ -145,12 +142,18 @@ class AdminAgency():
         for indexBus in range(len(self.__listBuses)):
             datasPossibleRouteBus = self.__getPossibleRouteOfBus(indexBus)
             hoursWorksOfPossibleRoute = datasPossibleRouteBus[1]
-            numberOfBus = self.__listBuses[indexBus].getNumberBus()
-            locationOfPossibleRouteBus = datasPossibleRouteBus[2][-1]
-            possibleRoute = datasPossibleRouteBus[2]
 
-            self.__asingRouteBus(hoursWorksOfPossibleRoute, numberOfBus, locationOfPossibleRouteBus, possibleRoute )
-            self.__copyOfDemandGraph[datasPossibleRouteBus[3]][datasPossibleRouteBus[2][-1]][0]['weight'] -= datasPossibleRouteBus[0]
+            while self.__listBuses[indexBus].getHoursWork() >= hoursWorksOfPossibleRoute:
+                numberOfBus = self.__listBuses[indexBus].getNumberBus()
+                locationOfPossibleRouteBus = datasPossibleRouteBus[2][-1]
+                possibleRoute = datasPossibleRouteBus[2]
+
+                self.__asingRouteBus(hoursWorksOfPossibleRoute, numberOfBus, locationOfPossibleRouteBus, possibleRoute )
+                self.__copyOfDemandGraph[datasPossibleRouteBus[3]][datasPossibleRouteBus[2][-1]][0]['weight'] -= datasPossibleRouteBus[0]
+
+                datasPossibleRouteBus = self.__getPossibleRouteOfBus(indexBus)
+                hoursWorksOfPossibleRoute += datasPossibleRouteBus[1]
+
 
 
     def assignRoutesToAllBuses2(self):

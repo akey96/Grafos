@@ -9,7 +9,7 @@ from project.controller.exception import CapacityNotAllowed
 
 @total_ordering
 class Bus():
-    capacity = 50
+    capacity = 70
     hourStart = 6
     hoursWork = 20
     cont = -1

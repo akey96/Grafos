@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 # coding: utf-8
-
+import threading
 from project.controller.adminAgency import AdminAgency
 from project.controller.bus import Bus
-
+import networkx as nx
+import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     admin = AdminAgency()
@@ -28,10 +29,19 @@ if __name__ == "__main__":
     admin.addBus(Bus('CBA'))
     admin.addBus(Bus('SCZ'))
 
+    admin.addBus(Bus('LPZ'))
+    admin.addBus(Bus('TJA'))
+    admin.addBus(Bus('TJA'))
+    admin.addBus(Bus('CBA'))
+    admin.addBus(Bus('CBA'))
+    admin.addBus(Bus('SCZ'))
+
+
     # ============================
     admin.addDemand('LPZ', 'ORU', 90)
     admin.addDemand('LPZ', 'PT', 45)
     admin.addDemand('LPZ', 'CBA', 50)
+    admin.addDemand('LPZ', 'CHQ', 30)
     admin.addDemand('LPZ', 'CHQ', 30)
     admin.addDemand('LPZ', 'SCZ', 40)
     admin.addDemand('LPZ', 'TJA', 30)
@@ -80,8 +90,11 @@ if __name__ == "__main__":
 
     print(f'{"demanda inicial":=^40}\n')
     dic = admin.getGraphDemand()
+    cont = 0
     for demand in dic.edges.data():
         print(demand)
+        cont+=demand[2]['weight']
+    print("demanta total es ", cont)
 
     print(f'{"":-^40}')
     admin.assignRoutesToAllBuses2()
@@ -89,10 +102,17 @@ if __name__ == "__main__":
 
     print(f'{"rutas demandas modificas":=^40}\n')
     dic = admin.getGraphDemand()
+    cont = 0
     for demand in dic.edges.data():
         print(demand)
+        cont += demand[2]['weight']
+    print("demanta total es ", cont)
 
-    #print(f'{"buses":=^40}\n')
-    #for bus in admin.getListBuses():
-    #    print(bus)
+
     print(admin)
+
+    nx.draw_circular(admin.getGraphDemand(), with_labels=True)
+    plt.show()
+
+    nx.draw(admin.getGraph(), with_labels=True)
+    plt.show()
