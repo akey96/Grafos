@@ -5,188 +5,157 @@ from copy import deepcopy
 import networkx as nx
 from project.controller.bus import Bus
 from project.controller.routeBus import RouteBus
-import matplotlib.pyplot as plt
 
 class AdminAgency():
     
     def __init__(self):
         self.__listBuses = []
 
-        self.__map = nx.Graph()
-        self.__graph = None
-        self.__graphDemand = nx.MultiDiGraph()
+        self.__mapGraph = nx.Graph()
+        self.__copyOfMapGraph = None
+        self.__demandGraph = nx.MultiDiGraph()
+        self.__copyOfDemandGraph = nx.MultiDiGraph()
 
     def getGraphDemand(self):
-        return self.__graphDemand
+        return self.__copyOfDemandGraph
 
     def getMap(self):
-        return self.__map
-    
-    def addBus(self, bus):
-        self.__listBuses.append(bus)
-        self.__listBuses = sorted(self.__listBuses)
+        return self.__mapGraph
 
     def getGraph(self):
-        return self.__graph
-
-    def setGraph(self, graph):
-        self.__graph = graph
+        return self.__copyOfMapGraph
 
     def getListBuses(self):
         return self.__listBuses
 
+    def setGraph(self, graph):
+        self.__copyOfMapGraph = graph
+
+    def addBus(self, bus):
+        self.__listBuses.append(bus)
+        self.__listBuses = sorted(self.__listBuses)
 
     def addRoute(self, nodeBegin, nodeEnd, timeTravel ):
-        self.__map.add_edge( nodeBegin, nodeEnd, weight=timeTravel )
-        self.__graph = deepcopy( self.__map )
+        self.__mapGraph.add_edge(nodeBegin, nodeEnd, weight=timeTravel)
+        self.__copyOfMapGraph = deepcopy(self.__mapGraph)
 
+    def addDemand(self, nodeBegin, nodeEnd, demandPassenger):
+        self.__demandGraph.add_edge(nodeBegin, nodeEnd, weight=demandPassenger)
+        self.__copyOfDemandGraph = deepcopy(self.__demandGraph)
 
-    def __costeRoute(self, route):
+    def __costeRouteOfGraphMap(self, route):
         coste = 0
         for i in range(1,len(route)):
             begin = route[i-1]
             end = route[i]
-            coste += self.__graph[begin][end]['weight']
+            coste += self.__copyOfMapGraph[begin][end]['weight']
         return coste
 
-    def __busFree(self, costeRoute, beginBus):
-        index = -1
-        for i in range(len(self.__listBuses)):
-            if self.__listBuses[i].getHoursWork() >= costeRoute and self.__listBuses[i].getPosition() == beginBus:
-                index = i
-                break
-        return index
+    def __costeRouteOfGraphDemand(self, route):
+        coste = 0
+        for i in range(1,len(route)):
+            begin = route[i-1]
+            end = route[i]
+            coste += self.__copyOfDemandGraph[begin][end][0]['weight']
+        return coste
 
-    def __asingBus(self, costeRoute, indexBus, updateLocation, route):
+    def lockingRoute( self, nodeBegin, nodeEnd ):
+        self.__copyOfMapGraph.remove_edge(nodeBegin, nodeEnd)
+
+    def unlockingRoute(self, nodeBegin, nodeEnd ):
+        timeTravel = self.__mapGraph[nodeBegin][nodeEnd]['weight']
+        self.__copyOfMapGraph.add_edge(nodeBegin, nodeEnd, weight=timeTravel)
+
+    def __defineHours(self, timeOfDeparture ,costeRoute):
+        hour = timeOfDeparture + costeRoute
+        if hour >= 24 :
+            return hour-24
+        return hour
+
+
+    def __asingRouteBus(self, costeRoute, indexBus, location, route):
         timeOfDeparture = (Bus.hourStart + Bus.hoursWork) - self.__listBuses[indexBus].getHoursWork()
-        timeOfArrival = timeOfDeparture + costeRoute
+        timeOfArrival = self.__defineHours(timeOfDeparture ,costeRoute)
+
         routeBus = RouteBus(route, timeOfDeparture, timeOfArrival)
         self.__listBuses[indexBus].addRouteToListRoutesBuses(routeBus)
         self.__listBuses[indexBus].subHoursWork(costeRoute)
-        self.__listBuses[indexBus].setPosition(updateLocation)
-
-
-    def routePartital(self):
-        for begin in self.__dicDemandsForDay.keys():
-            for end in self.__dicDemandsForDay[begin].keys():
-                self.__hayarRoutaMasLarga(begin,end)
-        """
-        inicio = locataionBus
-        fin = maoyor de demadnda[inicio]
-        while capacidad sea numpasa < capacidad
-            ## agarrar el mayor numero de pasajero posible
-            # mientras las horas de trabajp sea menor a 20
-            inicio = fin
-            fin = maoyor de demadnda[inicio]
-
-        """
-        caminos = []
-        for begin in self.__dicDemandsForDay.keys():
-            pass
-            #print( begin,  self.__dicDemandsForDay[begin] )
-            #for end in self.__dicDemandsForDay[begin].keys():
-
-
-    def lockingRoute( self, nodeBegin, nodeEnd ):
-        self.__graph.remove_edge(nodeBegin, nodeEnd)
-
-    def unlockingRoute(self, nodeBegin, nodeEnd ):
-        timeTravel = self.__map[nodeBegin][nodeEnd]['weight']
-        self.__graph.add_edge( nodeBegin, nodeEnd, weight=timeTravel )
+        self.__listBuses[indexBus].setPosition(location)
 
 
 
-    # ============================== 2da parte
+    def __getNeighborsOfNodeDemand(self, node):
+        neighbors = list(self.__copyOfDemandGraph.neighbors(node))
+        dictOfNeighbors = {}
+        for neighbor in neighbors:
+            weight = self.__copyOfDemandGraph[node][neighbor][0]['weight']
+            if weight > 0:
+                dictOfNeighbors[neighbor] = weight
+        dictOfNeighbors = OrderedDict(sorted(dictOfNeighbors.items(), key=lambda t: t[1], reverse=True))
+        return  dictOfNeighbors
 
-    def __costeRoute2(self, route):
-        coste = 0
-        for i in range(1,len(route)):
-            begin = route[i-1]
-            end = route[i]
-            coste += self.__graphDemand[begin][end][0]['weight']
-        return coste
+
+    def __getPossibleRouteOfBus(self, indexBus):
+        DemandsAdjOfBus = self.__getNeighborsOfNodeDemand(self.__listBuses[indexBus].getPosition())
+        routeGraphFinal = []
+        costeGraphFinal = 0
+        costeDemandFinal = 0
+        copyBus = deepcopy(self.__listBuses[indexBus])
+        #print(copyBus.getNumberBus())
+        for sigDemandAdj, sigCosteAdj in DemandsAdjOfBus.items():
+            route = nx.dijkstra_path(self.__copyOfMapGraph,  self.__listBuses[indexBus].getPosition(), sigDemandAdj)
+            costeRouteGraph = self.__costeRouteOfGraphMap(route)
+
+            if self.__listBuses[indexBus].getFree_seats() >= DemandsAdjOfBus[sigDemandAdj] and self.__listBuses[indexBus].getHoursWork() >= costeRouteGraph:
+                if costeRouteGraph > costeGraphFinal:
+                    #print(copyBus.getFree_seats())
+                    routeGraphFinal = route
+                    costeGraphFinal = costeRouteGraph
+                    costeDemandFinal = sigCosteAdj
+        return (costeDemandFinal, costeGraphFinal, routeGraphFinal, self.__listBuses[indexBus].getPosition()  )
 
 
-    def routeDirect2(self):
+    def __defineDirectRoutesToBuses(self):
         for indexBus in range(len(self.__listBuses)):
             invalid = False
             while not invalid :
-                pathsOfDemands = nx.single_source_dijkstra_path(self.__graphDemand, self.__listBuses[indexBus].getPosition(), weight=Bus.getCapacity())
+                pathsOfDemands = nx.single_source_dijkstra_path(self.__copyOfDemandGraph, self.__listBuses[indexBus].getPosition(), weight=Bus.getCapacity())
                 pathsOfDemands = list(pathsOfDemands.values())
 
                 for routeDemand in sorted(pathsOfDemands[1:], key=lambda x : len(x)):
-                    costeRouteDemand = self.__costeRoute2(routeDemand)
+                    costeRouteDemand = self.__costeRouteOfGraphDemand(routeDemand)
                     if costeRouteDemand >= Bus.getCapacity():
                         costeRouteGraph = 0
                         routeFinalGraph = []
                         for i in range(1, len(routeDemand)):
-                            routeGraph = nx.dijkstra_path(self.__graph, routeDemand[i-1], routeDemand[i])
-                            costeRouteGraph += self.__costeRoute(routeGraph)
+                            routeGraph = nx.dijkstra_path(self.__copyOfMapGraph, routeDemand[i - 1], routeDemand[i])
+                            costeRouteGraph += self.__costeRouteOfGraphMap(routeGraph)
                             routeFinalGraph.extend(routeGraph) if routeFinalGraph == [] else routeFinalGraph.extend(routeGraph[1:])
                         if costeRouteGraph > self.__listBuses[indexBus].getHoursWork():
                             invalid = True
                         else:
-                            self.__asingBus(costeRouteGraph, self.__listBuses[indexBus].getNumberBus(), routeFinalGraph[-1], routeFinalGraph)
-                            self.__graphDemand[routeDemand[0]][routeDemand[-1]][0]['weight'] -= self.__listBuses[indexBus].getCapacity()
+                            self.__asingRouteBus(costeRouteGraph, self.__listBuses[indexBus].getNumberBus(), routeFinalGraph[-1], routeFinalGraph)
+                            self.__copyOfDemandGraph[routeDemand[0]][routeDemand[-1]][0]['weight'] -= self.__listBuses[indexBus].getCapacity()
                         break
                     else:
                         invalid = True
 
-    def __getVecinosOfNode(self, node):
-        vecinos = list(self.__graphDemand.neighbors(node))
-        valores = {}
-        for i in vecinos:
-            k = self.__graphDemand[node][i][0]['weight']
-            if k > 0:
-                valores[i] = k
-        valores = OrderedDict(sorted(valores.items(), key=lambda t: t[1], reverse=True))
-        return  valores
 
-
-
-    def routePartital2(self):
+    def __definePartitalRoutesToBuses(self):
         for indexBus in range(len(self.__listBuses)):
-            listadePosiblesRutas = []
-            horasTotales = 0
+            datasPossibleRouteBus = self.__getPossibleRouteOfBus(indexBus)
+            hoursWorksOfPossibleRoute = datasPossibleRouteBus[1]
+            numberOfBus = self.__listBuses[indexBus].getNumberBus()
+            locationOfPossibleRouteBus = datasPossibleRouteBus[2][-1]
+            possibleRoute = datasPossibleRouteBus[2]
 
-            datos = self.__getARouteBus(indexBus)
-            horasTotales += datos[2]
-            while self.__listBuses[indexBus].getHoursWork() >= horasTotales:
-                self.__asingBus(datos[2], datos[0], datos[3][-1], datos[3])
-                #print(datos[4],datos[3][-1])
-                self.__graphDemand[datos[4]][datos[3][-1]][0]['weight'] -= datos[1]
-                datos = self.__getARouteBus(indexBus)
-                horasTotales += datos[2]
+            self.__asingRouteBus(hoursWorksOfPossibleRoute, numberOfBus, locationOfPossibleRouteBus, possibleRoute )
+            self.__copyOfDemandGraph[datasPossibleRouteBus[3]][datasPossibleRouteBus[2][-1]][0]['weight'] -= datasPossibleRouteBus[0]
 
-
-            #pathsOfDemands = [ element for element in pathsOfDemands if self.__costeRoute2(element) >0 ]
-            #pathsOfDemands = sorted(pathsOfDemands, key=lambda x: self.__costeRoute2(x), reverse=True)
-
-            print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-
-    def __getARouteBus(self, indexBus):
-        DemandsAdjOfBus = self.__getVecinosOfNode(self.__listBuses[indexBus].getPosition())
-        routeGraphFinal = []
-        costeGraphFinal = 0
-        costeDemandFinal = 0
-        for sigDemandAdj, sigCosteAdj in DemandsAdjOfBus.items():
-            route = nx.dijkstra_path(self.__graph, self.__listBuses[indexBus].getPosition(), sigDemandAdj)
-            costeRouteGraph = self.__costeRoute(route)
-            if self.__listBuses[indexBus].getNumberPassenger() >= DemandsAdjOfBus[sigDemandAdj] and self.__listBuses[
-                indexBus].getHoursWork() >= costeRouteGraph:
-                if costeRouteGraph > costeGraphFinal:
-                    routeGraphFinal = route
-                    costeGraphFinal = costeRouteGraph
-                    costeDemandFinal = sigCosteAdj
-        return (indexBus,costeDemandFinal, costeGraphFinal, routeGraphFinal, self.__listBuses[indexBus].getPosition()  )
-
-
-    def addDemand2(self,nodeBegin, nodeEnd, demandPassenger ):
-        self.__graphDemand.add_edge(nodeBegin, nodeEnd, weight=demandPassenger)
 
     def assignRoutesToAllBuses2(self):
-        self.routeDirect2()
-        self.routePartital2()
+        self.__defineDirectRoutesToBuses()
+        self.__definePartitalRoutesToBuses()
 
 
 
@@ -196,7 +165,7 @@ class AdminAgency():
             cad += bus.__repr__()
 
         cad += f'{"routes map for the graph" :_^40}\n\n'
-        for route in list(self.__map.edges.data()):
+        for route in list(self.__mapGraph.edges.data()):
             begin = route[0]
             end = route[1]
             timeT = route[2]['weight']

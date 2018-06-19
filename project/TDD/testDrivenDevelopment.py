@@ -16,10 +16,10 @@ class TestBus(unittest.TestCase):
         self.bus1 = Bus(1,50,False,"CBA")
 
     def test_01_overflow_bus(self):
-        self.assertRaises(CapacityNotAllowed , self.bus1.addPassenger , 100)
+        self.assertRaises(CapacityNotAllowed, self.bus1.addPassengerToBus, 100)
 
     def test_02_overflow_bus(self):
-        self.assertRaises(CapacityNotAllowed , self.bus1.subsPassenger, 100)
+        self.assertRaises(CapacityNotAllowed, self.bus1.removePassengerOfBus, 100)
 
 
 class TestAdminAgency( unittest.TestCase ):

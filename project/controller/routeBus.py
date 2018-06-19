@@ -15,9 +15,16 @@ class RouteBus():
     def getTimeOfArrival(self):
         return self.__timeOfArrival
 
+    def __hour(self, n):
+        if n>9:
+            return f'{n}:00 hrs'
+        else:
+            return f'0{n}:00 hrs'
+
+
     def __repr__(self):
-        cad = f'{"": ^4}{"Route Bus":-^30}\n'
-        cad += f'{"": ^4}{"route": <10} : {self.__route} \n'
-        cad += f'{"": ^4}{"timeOfDeparture": <10} : {self.__timeOfDeparture} \n'
-        cad += f'{"": ^4}{"timeOfArrival": <10} : {self.__timeOfArrival} \n'
+        cad = f'{"": ^4}{"Route Bus":-^40}\n'
+        cad += f'{"": ^4}{"route": <15} : {self.__route} \n'
+        cad += f'{"": ^4}{"timeOfDeparture": <15} : {self.__hour(self.__timeOfDeparture)} \n'
+        cad += f'{"": ^4}{"timeOfArrival": <15} : {self.__hour(self.__timeOfArrival)} \n'
         return cad

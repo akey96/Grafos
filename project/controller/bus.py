@@ -1,7 +1,10 @@
 #!/usr/bin/python3
 # coding: utf-8
+
+
 from functools import total_ordering
 from project.controller.exception import CapacityNotAllowed
+
 
 
 @total_ordering
@@ -16,7 +19,7 @@ class Bus():
         self.__numberBus = Bus.cont
         self.__free_seats = Bus.capacity
         self.__position = position
-        self.__hoursWork = 20
+        self.__hoursWork = Bus.hoursWork
         self.__listOfRoutesBus = []
 
     def getNumberBus(self):
@@ -24,6 +27,7 @@ class Bus():
 
     def addRouteToListRoutesBuses(self, routeBus):
         self.__listOfRoutesBus.append(routeBus)
+
     def getListRoutesBuses(self):
         return self.__listOfRoutesBus
 
@@ -47,16 +51,16 @@ class Bus():
     def setPosition(self, position):
         self.__position = position
 
-    def getNumberPassenger(self):
+    def getFree_seats(self):
         return self.__free_seats
 
-    def addPassenger(self, n ):
+    def removePassengerOfBus(self, n):
         if self.__free_seats + n > Bus.capacity:
             raise CapacityNotAllowed()
         self.__free_seats += n
 
-    def subsPassenger( self, n ):
-        if self.__free_seats -n < 0:
+    def addPassengerToBus(self, n):
+        if self.__free_seats-n < 0:
             raise CapacityNotAllowed()
         self.__free_seats -= n
 
@@ -74,10 +78,9 @@ class Bus():
         cad = f'{"Bus {}".format(self.__numberBus) :*^30}\n'
         cad += f'{"capacity": <10} : {Bus.capacity} \n'
         cad += f'{"position": <10} : {self.__position} \n'
-        cad += f'{"numberPassenger": <10} : {self.__free_seats} \n'
+        cad += f'{"free_seats": <10} : {self.__free_seats} \n'
         cad += f'{"hoursWork": <10} : {self.__hoursWork} \n'
         cad += f'{"listOfRoutesBus": <10} : \n'
         for routeBus in self.__listOfRoutesBus:
             cad += f'{routeBus.__repr__()} \n'
-
         return cad
